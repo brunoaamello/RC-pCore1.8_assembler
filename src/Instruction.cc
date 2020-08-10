@@ -13,105 +13,150 @@ pair<string, string> Instruction::separateLine(const string s){
     return make_pair(op, body);
 }
 
+string Instruction::getError(const ERROR err){
+    string err_msg = "";
+    switch(err){
+        case IMM3_OUT_OF_RANGE:
+            err_msg = "Immediate(3-bits) out of range [0, 7]";
+        case IMM8_OUT_OF_RANGE:
+            err_msg = "Immediate(8-bits) out of range [0, 255]";
+        case OFFSET_OUT_OF_RANGE:
+            err_msg = "Offset(11-bits) out of range [-1024, 1023]";
+        case REGISTER_OUT_OF_RANGE:
+            err_msg = "Register out of range [0, 15]";
+        case UNKNOWN_INSTRUCTION:
+            err_msg = "Unknown Instruction";
+        case NO_ERROR:
+            err_msg = "No Error";
+    }
+    return err_msg;
+}
+
+vector<ERROR> Instruction::unpackErrors(const int err){
+    int local_err;
+    vector<ERROR> errors;
+
+    if(err){
+        local_err = err & IMM3_OUT_OF_RANGE;
+        if (local_err){
+            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+        }
+        local_err = err & IMM8_OUT_OF_RANGE;
+        if (local_err){
+            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+        }
+        local_err = err & OFFSET_OUT_OF_RANGE;
+        if (local_err){
+            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+        }
+        local_err = err & REGISTER_OUT_OF_RANGE;
+        if (local_err){
+            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+        }
+    } else{
+        errors.insert(errors.end(), NO_ERROR);
+    }
+    return errors;
+}
+
 tuple<OP, byte, ERROR> Instruction::parseOp(const string s){
-    string ls = Utils::tolower(s);
     OP local_op = UNKNOWN;
     byte opcode = byte(0x00);
     ERROR err = NO_ERROR;
-    if(ls == "smsb"){
+    if(s == "smsb"){
         local_op = SMSB;
         opcode = byte(0x00);
-    }else if(ls == "nop"){
+    }else if(s == "nop"){
         local_op = NOP;
         opcode = byte(0x00);
-    }else if(ls == "sl"){
+    }else if(s == "sl"){
         local_op = SL;
         opcode = byte(0x08);
-    }else if(ls == "mov"){
+    }else if(s == "mov"){
         local_op = MOV;
         opcode = byte(0x08);
-    }else if(ls == "sr"){
+    }else if(s == "sr"){
         local_op = SR;
         opcode = byte(0x10);
-    }else if(ls == "add"){
+    }else if(s == "add"){
         local_op = ADD;
         opcode = byte(0x18);
-    }else if(ls == "addi"){
+    }else if(s == "addi"){
         local_op = ADDi;
         opcode = byte(0x20);
-    }else if(ls == "addc"){
+    }else if(s == "addc"){
         local_op = ADDC;
         opcode = byte(0x28);
-    }else if(ls == "addci"){
+    }else if(s == "addci"){
         local_op = ADDCi;
         opcode = byte(0x30);
-    }else if(ls == "sub"){
+    }else if(s == "sub"){
         local_op = SUB;
         opcode = byte(0x38);
-    }else if(ls == "subi"){
+    }else if(s == "subi"){
         local_op = SUBi;
         opcode = byte(0x40);
-    }else if(ls == "nand"){
+    }else if(s == "nand"){
         local_op = NAND;
         opcode = byte(0x48);
-    }else if(ls == "nandi"){
+    }else if(s == "nandi"){
         local_op = NANDi;
         opcode = byte(0x50);
-    }else if(ls == "nor"){
+    }else if(s == "nor"){
         local_op = NOR;
         opcode = byte(0x58);
-    }else if(ls == "nori"){
+    }else if(s == "nori"){
         local_op = NORi;
         opcode = byte(0x60);
-    }else if(ls == "xor"){
+    }else if(s == "xor"){
         local_op = XOR;
         opcode = byte(0x68);
-    }else if(ls == "xori"){
+    }else if(s == "xori"){
         local_op = XORi;
         opcode = byte(0x70);
-    }else if(ls == "not"){
+    }else if(s == "not"){
         local_op = NOT;
         opcode = byte(0x78);
-    }else if(ls == "sw"){
+    }else if(s == "sw"){
         local_op = SW;
         opcode = byte(0x80);
-    }else if(ls == "swi"){
+    }else if(s == "swi"){
         local_op = SWi;
         opcode = byte(0x88);
-    }else if(ls == "swc"){
+    }else if(s == "swc"){
         local_op = SWC;
         opcode = byte(0x90);
-    }else if(ls == "lw"){
+    }else if(s == "lw"){
         local_op = LW;
         opcode = byte(0x98);
-    }else if(ls == "lwi"){
+    }else if(s == "lwi"){
         local_op = LWi;
         opcode = byte(0xA0);
-    }else if(ls == "lwc"){
+    }else if(s == "lwc"){
         local_op = LWC;
         opcode = byte(0xA8);
-    }else if(ls == "j"){
+    }else if(s == "j"){
         local_op = J;
         opcode = byte(0xB0);
-    }else if(ls == "jal"){
+    }else if(s == "jal"){
         local_op = JAL;
         opcode = byte(0xB8);
-    }else if(ls == "ret"){
+    }else if(s == "ret"){
         local_op = RET;
         opcode = byte(0xC0);
-    }else if(ls == "jc"){
+    }else if(s == "jc"){
         local_op = JC;
         opcode = byte(0xC8);
-    }else if(ls == "jgz"){
+    }else if(s == "jgz"){
         local_op = JGZ;
         opcode = byte(0xD0);
-    }else if(ls == "jez"){
+    }else if(s == "jez"){
         local_op = JEZ;
         opcode = byte(0xD8);
-    }else if(ls == "jlz"){
+    }else if(s == "jlz"){
         local_op = JLZ;
         opcode = byte(0xE0);
-    }else if(ls == "movi"){
+    }else if(s == "movi"){
         local_op = MOVi;
         opcode = byte(0xE8);
     }else{
@@ -166,11 +211,11 @@ FORMAT Instruction::getFormat(const OP op){
     }
 }
 
-tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, const OP op, bool print_errors){
+tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, const OP op, const bool print_errors){
 
     byte msb = byte(0);
     byte lsb = byte(0);
-    ERROR err = NO_ERROR;
+    int err = NO_ERROR;
     byte access;
     int ra = 0, rb = 0, rc = 0;
     int imm = 0;
@@ -194,7 +239,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Immediate of value %d out of range\n", imm);
                 }
-                err = IMM3_OUT_OF_RANGE;
+                err |= IMM3_OUT_OF_RANGE;
                 imm %= 8;
             }
             msb |= byte(imm);
@@ -202,7 +247,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rb);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
@@ -212,7 +257,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", ra);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
@@ -223,7 +268,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rc);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 rc %= 8;
             }
             msb |= byte(rc);
@@ -231,7 +276,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rb);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
@@ -241,7 +286,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", ra);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
@@ -252,7 +297,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", ra);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 ra %= 8;
             }
             lsb |= byte(ra);
@@ -260,7 +305,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Immediate of value %d out of range\n", imm);
                 }
-                err = IMM8_OUT_OF_RANGE;
+                err |= IMM8_OUT_OF_RANGE;
                 imm %= 256;
             }
             access = byte(imm);
@@ -276,7 +321,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rb);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
@@ -286,7 +331,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", ra);
                 }
-                err = REGISTER_OUT_OF_RANGE;
+                err |= REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
@@ -297,7 +342,7 @@ tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, 
                 if(print_errors){
                     fprintf(stderr, "Offset of value %d out of range\n", imm);
                 }
-                err = OFFSET_OUT_OF_RANGE;
+                err |= OFFSET_OUT_OF_RANGE;
                 imm %= 1024;
             }
             rc = imm >> 8;

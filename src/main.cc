@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
     pair<string, string> sep;
     tuple<Instruction::OP, byte, Instruction::ERROR> op;
     Instruction::FORMAT f;
-    tuple<byte, byte, Instruction::ERROR> bytes;
+    tuple<byte, byte, int> bytes;
 
     while(true){
         line_size = getline(&buffer, &buffer_size, infile);

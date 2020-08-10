@@ -1,12 +1,16 @@
+#ifndef ASSEMBLER_INSTRUCTION
+#define ASSEMBLER_INSTRUCTION
+
 #include <string>
 #include <tuple>
 #include <cstddef>
+#include <vector>
 
 #include "Utils.h"
 
 using std::tuple;
 using std::pair;
-using std::make_pair;
+using std::vector;
 using std::string;
 using std::byte;
 
@@ -14,8 +18,10 @@ class Instruction{
 public:
     enum OP{
         SMSB,
+        NOP,
         SL,
         SR,
+        MOV,
         ADD,
         ADDi,
         ADDC,
@@ -43,8 +49,6 @@ public:
         JEZ,
         JLZ,
         MOVi,
-        NOP,
-        MOV,
         UNKNOWN
     };
     using OP = enum OP;
@@ -59,20 +63,25 @@ public:
     };
     using FORMAT = enum FORMAT;
     enum ERROR{
-        UNKNOWN_INSTRUCTION,
-        IMM3_OUT_OF_RANGE,
-        IMM8_OUT_OF_RANGE,
-        OFFSET_OUT_OF_RANGE,
-        REGISTER_OUT_OF_RANGE,
-        NO_ERROR
+        NO_ERROR = 0x00,
+        UNKNOWN_INSTRUCTION = 0x01,
+        IMM3_OUT_OF_RANGE = 0x02,
+        IMM8_OUT_OF_RANGE = 0x04,
+        OFFSET_OUT_OF_RANGE = 0x08,
+        REGISTER_OUT_OF_RANGE = 0x16
     };
     using ERROR = enum ERROR;
+
+    static string getError(const ERROR err);
+    static vector<ERROR> unpackErrors(const int err);
 
     static pair<string, string> separateLine(const string s);
     static tuple<OP, byte, ERROR> parseOp(const string s);
     static FORMAT getFormat(const OP op);
-    static tuple<byte, byte, ERROR> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, bool print_errors = false);
+    static tuple<byte, byte, int> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, const bool print_errors = false);
 
     Instruction(string line);
 
 };
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef ASSEMBLER_UTILS
+#define ASSEMBLER_UTILS
+
 #include <string>
 #include <algorithm>
 
@@ -7,5 +10,8 @@ class Utils {
 
 public:
     static string tolower(const string s);
+    static string trimm(const string s);
 
 };
+
+#endif
