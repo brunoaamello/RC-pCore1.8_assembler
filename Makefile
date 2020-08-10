@@ -1,6 +1,6 @@
 
 
-SRC_FILES = ./src/main.cc ./src/Instruction.cc
+SRC_FILES = ./src/main.cc ./src/Instruction.cc ./src/Utils.cc
 
 all:
 	g++ -std=c++17 -Wall -o rcassembler $(SRC_FILES) -I"./include"

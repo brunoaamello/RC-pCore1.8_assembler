@@ -1,11 +1,13 @@
 #include <cstdlib>
 #include <cstdio>
 #include <string>
+#include <tuple>
 
 #include "Instruction.h"
 
 using std::sscanf;
 using std::string;
+using std::get;
 
 int main(int argc, char *argv[]){
 
@@ -46,9 +48,9 @@ int main(int argc, char *argv[]){
 
     string line;
     pair<string, string> sep;
-    pair<Instruction::OP, byte> op;
+    tuple<Instruction::OP, byte, Instruction::ERROR> op;
     Instruction::FORMAT f;
-    pair<byte, byte> bytes;
+    tuple<byte, byte, Instruction::ERROR> bytes;
 
     while(true){
         line_size = getline(&buffer, &buffer_size, infile);
@@ -58,13 +60,13 @@ int main(int argc, char *argv[]){
         line = string(buffer);
         sep = Instruction::separateLine(line);
         op = Instruction::parseOp(sep.first);
-        f = Instruction::getFormat(op.first);
-        bytes = Instruction::parseBody(sep.second, f, op.first);
-        bytes.first |= op.second;
+        f = Instruction::getFormat(get<0>(op));
+        bytes = Instruction::parseBody(sep.second, f, get<0>(op));
+        get<0>(bytes) |= get<1>(op);
 
-        if(op.first!=Instruction::UNKNOWN && f!=Instruction::NO_FORMAT){
-            fwrite(&bytes.first, sizeof(byte), 1, outfile);
-            fwrite(&bytes.second, sizeof(byte), 1, outfile);
+        if(get<0>(op)!=Instruction::UNKNOWN && f!=Instruction::NO_FORMAT){
+            fwrite(&get<0>(bytes), sizeof(byte), 1, outfile);
+            fwrite(&get<1>(bytes), sizeof(byte), 1, outfile);
         }
         printf("Line %lu parsed\r", line_count);
         line_count++;

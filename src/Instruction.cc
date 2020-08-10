@@ -2,13 +2,7 @@
 
 using OP = Instruction::OP;
 using FORMAT = Instruction::FORMAT;
-using std::byte;
-
-string Instruction::tolower(const string s){
-    string ls(s);
-    std::transform(ls.begin(), ls.end(), ls.begin(), ::tolower);
-    return ls;
-}
+using ERROR = Instruction::ERROR;
 
 pair<string, string> Instruction::separateLine(const string s){
     char op_chars[10];
@@ -19,10 +13,11 @@ pair<string, string> Instruction::separateLine(const string s){
     return make_pair(op, body);
 }
 
-pair<OP, byte> Instruction::parseOp(const string s){
-    string ls = tolower(s);
+tuple<OP, byte, ERROR> Instruction::parseOp(const string s){
+    string ls = Utils::tolower(s);
     OP local_op = UNKNOWN;
     byte opcode = byte(0x00);
+    ERROR err = NO_ERROR;
     if(ls == "smsb"){
         local_op = SMSB;
         opcode = byte(0x00);
@@ -119,9 +114,11 @@ pair<OP, byte> Instruction::parseOp(const string s){
     }else if(ls == "movi"){
         local_op = MOVi;
         opcode = byte(0xE8);
+    }else{
+        err = UNKNOWN_INSTRUCTION;
     }
 
-    return make_pair(local_op, opcode);
+    return make_tuple(local_op, opcode, err);
 }
 
 FORMAT Instruction::getFormat(const OP op){
@@ -169,10 +166,11 @@ FORMAT Instruction::getFormat(const OP op){
     }
 }
 
-pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP op){
+tuple<byte, byte, ERROR> Instruction::parseBody(const string s, const FORMAT f, const OP op, bool print_errors){
 
     byte msb = byte(0);
     byte lsb = byte(0);
+    ERROR err = NO_ERROR;
     byte access;
     int ra = 0, rb = 0, rc = 0;
     int imm = 0;
@@ -193,19 +191,28 @@ pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP
         case R4_R4_I3:
             sscanf(s.c_str(), "R%d R%d %d", &ra, &rb, &imm);
             if(imm > 7){
-                fprintf(stderr, "Immediate of value %d out of range\n", imm);
+                if(print_errors){
+                    fprintf(stderr, "Immediate of value %d out of range\n", imm);
+                }
+                err = IMM3_OUT_OF_RANGE;
                 imm %= 8;
             }
             msb |= byte(imm);
             if(rb > 15){
-                fprintf(stderr, "Register of value %d out of range\n", rb);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", rb);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
             access <<= 4;
             lsb |= access;
             if(ra > 15){
-                fprintf(stderr, "Register of value %d out of range\n", ra);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", ra);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
@@ -213,19 +220,28 @@ pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP
         case R4_R4_R3:
             sscanf(s.c_str(), "R%d R%d R%d", &ra, &rb, &rc);
             if(rc > 15){
-                fprintf(stderr, "Register of value %d out of range\n", rc);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", rc);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 rc %= 8;
             }
             msb |= byte(rc);
             if(rb > 15){
-                fprintf(stderr, "Register of value %d out of range\n", rb);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", rb);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
             access <<= 4;
             lsb |= access;
             if(ra > 15){
-                fprintf(stderr, "Register of value %d out of range\n", ra);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", ra);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
@@ -233,12 +249,18 @@ pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP
         case R3_I8:
             sscanf(s.c_str(), "R%d %d", &ra, &imm);
             if(ra > 15){
-                fprintf(stderr, "Register of value %d out of range\n", ra);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", ra);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 ra %= 8;
             }
             lsb |= byte(ra);
             if(imm > 255){
-                fprintf(stderr, "Immediate of value %d out of range\n", imm);
+                if(print_errors){
+                    fprintf(stderr, "Immediate of value %d out of range\n", imm);
+                }
+                err = IMM8_OUT_OF_RANGE;
                 imm %= 256;
             }
             access = byte(imm);
@@ -251,23 +273,32 @@ pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP
         case R4_R4:
             sscanf(s.c_str(), "R%d R%d", &ra, &rb);
             if(rb > 15){
-                fprintf(stderr, "Register of value %d out of range\n", rb);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", rb);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 rb %= 16;
             }
             access = byte(rb);
             access <<= 4;
             lsb |= access;
             if(ra > 15){
-                fprintf(stderr, "Register of value %d out of range\n", ra);
+                if(print_errors){
+                    fprintf(stderr, "Register of value %d out of range\n", ra);
+                }
+                err = REGISTER_OUT_OF_RANGE;
                 ra %= 16;
             }
             lsb |= byte(ra);
             break;
         case I11:
             sscanf(s.c_str(), "%d", &imm);
-            if(imm > 2047){
-                fprintf(stderr, "Offset of value %d out of range\n", imm);
-                imm %= 2048;
+            if(imm > 1023 || imm < -1024){
+                if(print_errors){
+                    fprintf(stderr, "Offset of value %d out of range\n", imm);
+                }
+                err = OFFSET_OUT_OF_RANGE;
+                imm %= 1024;
             }
             rc = imm >> 8;
             access = byte(rc) & byte(0b00000111);
@@ -279,7 +310,7 @@ pair<byte, byte> Instruction::parseBody(const string s, const FORMAT f, const OP
             break;
     }
 
-    return make_pair(msb, lsb);
+    return make_tuple(msb, lsb, err);
 }
 
 

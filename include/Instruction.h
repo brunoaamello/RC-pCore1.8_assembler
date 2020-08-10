@@ -1,17 +1,16 @@
 #include <string>
 #include <tuple>
-#include <algorithm>
 #include <cstddef>
 
+#include "Utils.h"
+
+using std::tuple;
 using std::pair;
 using std::make_pair;
 using std::string;
 using std::byte;
 
 class Instruction{
-private:
-    static string tolower(const string s);
-
 public:
     enum OP{
         SMSB,
@@ -59,11 +58,20 @@ public:
         NO_FORMAT
     };
     using FORMAT = enum FORMAT;
+    enum ERROR{
+        UNKNOWN_INSTRUCTION,
+        IMM3_OUT_OF_RANGE,
+        IMM8_OUT_OF_RANGE,
+        OFFSET_OUT_OF_RANGE,
+        REGISTER_OUT_OF_RANGE,
+        NO_ERROR
+    };
+    using ERROR = enum ERROR;
 
     static pair<string, string> separateLine(const string s);
-    static pair<OP, byte> parseOp(const string s);
+    static tuple<OP, byte, ERROR> parseOp(const string s);
     static FORMAT getFormat(const OP op);
-    static pair<byte, byte> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN);
+    static tuple<byte, byte, ERROR> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, bool print_errors = false);
 
     Instruction(string line);
 
