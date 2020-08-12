@@ -11,3 +11,9 @@ string Utils::trimm(const string s){
     ns.erase(remove_if(ns.begin(), ns.end(), ::isspace), ns.end());
     return ns;
 }
+
+string Utils::removeBreaks(const string s){
+    string ns(s);
+    ns.erase(std::remove(ns.begin(), ns.end(), '\n'), ns.end());
+    return ns;
+}

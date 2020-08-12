@@ -4,6 +4,7 @@ Line::Line(const char *line, const size_t count){
     this->count = count;
     original = string(line);
     lower = Utils::tolower(original);
+    lower = Utils::removeBreaks(lower);
 
     pair<string, string> access = separateLabel(lower);
 
@@ -28,10 +29,16 @@ Line::Line(const char *line, const size_t count){
         valid = true;
     }
 
+    printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+
 }
 
 size_t Line::len(){
     return original.length();
+}
+
+size_t Line::numWords(){
+    return 1;
 }
 
 pair<string, string> Line::separateLabel(const string s){
@@ -90,15 +97,26 @@ int Line::processLine(const map<string, size_t> label_table, const size_t word_c
         body = replaceLabel(body, label_table, word_count);
     }
 
+
+    printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+
     bytes = Instruction::parseBody(body, format, op);
     line[0] = get<0>(bytes);
     line[1] = get<1>(bytes);
     
     line[0] |= opcode;
 
+    vector<Instruction::ERROR> err = Instruction::unpackErrors(get<2>(bytes));
+    for(auto it = err.begin(); it != err.end(); it++){
+        fprintf(stderr, "Error in line %lu: %s\n", count, Instruction::getError(*it).c_str());
+    }
+
     return get<2>(bytes);
 }
 
-pair<byte, byte> Line::getWord(){
-    return make_pair(line[0], line[1]);
+vector<byte> Line::getWords(){
+    vector<byte> words;
+    words.insert(words.end(), line[0]);
+    words.insert(words.end(), line[1]);
+    return words;
 }

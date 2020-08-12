@@ -39,9 +39,9 @@ class Line{
 
     public:
         Line(const char *line, const size_t count);
-        ~Line();
         
         size_t len();
+        size_t numWords();
 
         static pair<string, string> separateLabel(const string s);
         static string replaceLabel(const string s, const map<string, size_t> label_table, const size_t word_count);
@@ -49,7 +49,7 @@ class Line{
         bool hasLabel();
         string getLabel();
         bool isValid();
-        pair<byte, byte> getWord();
+        vector<byte> getWords();
 
         int processLine(const map<string, size_t> label_table, const size_t word_count);
 };

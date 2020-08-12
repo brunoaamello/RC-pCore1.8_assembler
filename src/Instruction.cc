@@ -53,8 +53,6 @@ vector<ERROR> Instruction::unpackErrors(const int err){
         if (local_err){
             errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
         }
-    } else{
-        errors.insert(errors.end(), NO_ERROR);
     }
     return errors;
 }
@@ -234,7 +232,7 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
             }
             break;
         case R4_R4_I3:
-            sscanf(s.c_str(), "R%d R%d %d", &ra, &rb, &imm);
+            sscanf(s.c_str(), "r%d r%d %d", &ra, &rb, &imm);
             if(imm > 7){
                 if(print_errors){
                     fprintf(stderr, "Immediate of value %d out of range\n", imm);
@@ -263,7 +261,7 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
             lsb |= byte(ra);
             break;
         case R4_R4_R3:
-            sscanf(s.c_str(), "R%d R%d R%d", &ra, &rb, &rc);
+            sscanf(s.c_str(), "r%d r%d r%d", &ra, &rb, &rc);
             if(rc > 15){
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rc);
@@ -292,7 +290,7 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
             lsb |= byte(ra);
             break;
         case R3_I8:
-            sscanf(s.c_str(), "R%d %d", &ra, &imm);
+            sscanf(s.c_str(), "r%d %d", &ra, &imm);
             if(ra > 15){
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", ra);
@@ -316,7 +314,7 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
             msb |= access;
             break;
         case R4_R4:
-            sscanf(s.c_str(), "R%d R%d", &ra, &rb);
+            sscanf(s.c_str(), "r%d r%d", &ra, &rb);
             if(rb > 15){
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rb);

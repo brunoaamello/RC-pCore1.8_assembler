@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <string>
 #include <tuple>
-#include <utility>
 
 #include "Utils.h"
 #include "Instruction.h"
@@ -11,10 +10,10 @@
 using std::sscanf;
 using std::string;
 using std::get;
-using std::make_pair;
 
 int main(int argc, char *argv[]){
 
+/*
     string infilename;
 
     if(argc <= 1){
@@ -48,65 +47,68 @@ int main(int argc, char *argv[]){
     char* buffer = (char*) calloc(buffer_size, sizeof(char));
 
     int line_size;
-    size_t line_count = 0, word_count = 0;
+    size_t line_count = 0;
 
-    Line *line;
-    vector<pair<Line*, size_t>> lines;
-    map<string, size_t> label_table;
-    vector<byte> instruction_bytes;
+*/
 
-    // Line read and label processing
-    
-    printf("\nSeparated lines [label|op|body]:\n");
+
+/*
+    string line;
+    pair<string, string> sep;
+    tuple<Instruction::OP, byte, Instruction::ERROR> op;
+    Instruction::FORMAT f;
+    tuple<byte, byte, int> bytes;
 
     while(true){
         line_size = getline(&buffer, &buffer_size, infile);
         if(line_size == EOF){
             break;
         }
+        
+        line = string(buffer);
+        sep = Instruction::separateLine(line);
+        op = Instruction::parseOp(sep.first);
+        f = Instruction::getFormat(get<0>(op));
+        bytes = Instruction::parseBody(sep.second, f, get<0>(op));
+        get<0>(bytes) |= get<1>(op);
+        
 
-        line = new Line(buffer, line_count);
-        lines.insert(lines.end(), make_pair(line, 0));
+        if(get<0>(op)!=Instruction::UNKNOWN && f!=Instruction::NO_FORMAT){
+        
+            fwrite(&get<0>(bytes), sizeof(byte), 1, outfile);
+            fwrite(&get<1>(bytes), sizeof(byte), 1, outfile);
+        }
+        printf("Line %lu parsed\r", line_count);
         line_count++;
     }
+*/
 
-    // Label compute and store
+    string line0 = "FIB: NOP";
+    line0 = Utils::tolower(line0);
+    pair<string, string> label_body = Line::separateLabel(line0);
+    string label = label_body.first;
+    string body = label_body.second;
+    printf("Label: %s\n", label.c_str());
+    printf("Body: %s\n", body.c_str());
+    
+    map<string, size_t> label_map;
 
-    for(auto it = lines.begin(); it != lines.end(); it++){
-        if(it->first->hasLabel()){
-            label_table.insert(make_pair(it->first->getLabel(), word_count));
-        }
-        if(it->first->isValid()){
-            it->second = word_count;
-            word_count += it->first->numWords();
-        }
-    }
+    label_map.insert(make_pair(label, 0));
 
-    // Instruction processing and output writing
+    string og = "j fib";
+    string replaced = Line::replaceLabel(og, label_map, 7);
+    
+    printf("Original: %s\n", og.c_str());
+    printf("Replaced: %s\n", replaced.c_str());
 
-    printf("\nReplaced labels:\n");
 
-    for(auto it = lines.begin(); it != lines.end(); it++){
-        if(it->first->isValid()){
-            it->first->processLine(label_table, it->second);
-            
-            instruction_bytes = it->first->getWords();
-            for(auto jt = instruction_bytes.begin(); jt != instruction_bytes.end(); jt++){
-                fwrite(&(*jt), sizeof(byte), 1, outfile);
-            }
-        }
-    }
-
+/*
     printf("\nFinished parsing file, saved to %s\n", outfilename.c_str());
-
-    // Cleanup
-
-    for(auto it = lines.begin(); it != lines.end(); it++){
-        delete it->first;
-    }
 
     fclose(infile);
     fclose(outfile);
+
+*/
 
     return 0;
 }
