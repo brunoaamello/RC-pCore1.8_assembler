@@ -358,4 +358,17 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
     return make_tuple(msb, lsb, err);
 }
 
+bool Instruction::labelAble(const OP op){
+    switch(op){
+            case J:
+            case JAL:
+            case JC:
+            case JGZ:
+            case JEZ:
+            case JLZ:
+                return true;
+            default:
+                return false;
+    }
+}
 

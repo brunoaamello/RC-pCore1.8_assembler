@@ -3,7 +3,9 @@
 #include <string>
 #include <tuple>
 
+#include "Utils.h"
 #include "Instruction.h"
+#include "Line.h"
 
 using std::sscanf;
 using std::string;
@@ -11,6 +13,7 @@ using std::get;
 
 int main(int argc, char *argv[]){
 
+/*
     string infilename;
 
     if(argc <= 1){
@@ -46,6 +49,10 @@ int main(int argc, char *argv[]){
     int line_size;
     size_t line_count = 0;
 
+*/
+
+
+/*
     string line;
     pair<string, string> sep;
     tuple<Instruction::OP, byte, Instruction::ERROR> op;
@@ -57,25 +64,51 @@ int main(int argc, char *argv[]){
         if(line_size == EOF){
             break;
         }
+        
         line = string(buffer);
         sep = Instruction::separateLine(line);
         op = Instruction::parseOp(sep.first);
         f = Instruction::getFormat(get<0>(op));
         bytes = Instruction::parseBody(sep.second, f, get<0>(op));
         get<0>(bytes) |= get<1>(op);
+        
 
         if(get<0>(op)!=Instruction::UNKNOWN && f!=Instruction::NO_FORMAT){
+        
             fwrite(&get<0>(bytes), sizeof(byte), 1, outfile);
             fwrite(&get<1>(bytes), sizeof(byte), 1, outfile);
         }
         printf("Line %lu parsed\r", line_count);
         line_count++;
     }
+*/
 
+    string line0 = "FIB: NOP";
+    line0 = Utils::tolower(line0);
+    pair<string, string> label_body = Line::separateLabel(line0);
+    string label = label_body.first;
+    string body = label_body.second;
+    printf("Label: %s\n", label.c_str());
+    printf("Body: %s\n", body.c_str());
+    
+    map<string, size_t> label_map;
+
+    label_map.insert(make_pair(label, 0));
+
+    string og = "j fib";
+    string replaced = Line::replaceLabel(og, label_map, 7);
+    
+    printf("Original: %s\n", og.c_str());
+    printf("Replaced: %s\n", replaced.c_str());
+
+
+/*
     printf("\nFinished parsing file, saved to %s\n", outfilename.c_str());
 
     fclose(infile);
     fclose(outfile);
 
-    
+*/
+
+    return 0;
 }

@@ -80,7 +80,7 @@ public:
     static FORMAT getFormat(const OP op);
     static tuple<byte, byte, int> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, const bool print_errors = false);
 
-    Instruction(string line);
+    static bool labelAble(const OP op);
 
 };
 

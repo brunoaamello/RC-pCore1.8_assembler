@@ -32,8 +32,10 @@ class Line{
         string label, instruction, body;
         size_t count;
         Instruction::OP op;
+        Instruction::FORMAT format;
         byte opcode;
         bool valid;
+        byte line[2];
 
     public:
         Line(const char *line, const size_t count);
@@ -47,8 +49,9 @@ class Line{
         bool hasLabel();
         string getLabel();
         bool isValid();
+        pair<byte, byte> getWord();
 
-        int processLine(const size_t word_count);
+        int processLine(const map<string, size_t> label_table, const size_t word_count);
 };
 
 #endif

@@ -19,7 +19,10 @@ Line::Line(const char *line, const size_t count){
 
     this->op = get<0>(op);
     opcode = get<1>(op);
-    if(get<2>(op) == Instruction::ERROR::UNKNOWN_INSTRUCTION){
+
+    format = Instruction::getFormat(this->op);
+    
+    if(get<2>(op) == Instruction::ERROR::UNKNOWN_INSTRUCTION || format == Instruction::NO_FORMAT){
         valid = false;
     }else{
         valid = true;
@@ -40,9 +43,9 @@ pair<string, string> Line::separateLabel(const string s){
     if(end_of_label == string::npos){
         label = "";
     }else{
-        label = body.substr(0, end_of_label-1);
+        label = body.substr(0, end_of_label);
         label = Utils::trimm(label);
-        body.erase(0, end_of_label);
+        body.erase(0, end_of_label+1);
     }
 
     return make_pair(label, body);
@@ -54,13 +57,15 @@ string Line::replaceLabel(const string s, const map<string, size_t> label_table,
     int offset;
     string ns = string(s);
     for(auto it = label_table.begin(); it != label_table.end(); it++){
-        pos = s.find(it->first);
+        pos = ns.find(it->first);
         if(pos != string::npos){
             label_len = it->first.length();
-            offset = it->second-(word_count+1);
-            ns.erase(pos, label_len);
-            ns.insert(pos, std::to_string(offset));
-            break;
+            if(ns.length() == pos + label_len || ::isspace(ns.at(pos + label_len))){
+                offset = it->second-(word_count+1);
+                ns.erase(pos, label_len);
+                ns.insert(pos, std::to_string(offset));
+                break;
+            }
         }
     }
     return ns;
@@ -78,6 +83,22 @@ bool Line::isValid(){
     return valid;
 }
 
-int Line::processLine(const size_t word_count){
+int Line::processLine(const map<string, size_t> label_table, const size_t word_count){
+    tuple<byte, byte, int> bytes;
 
+    if(Instruction::labelAble(op)){
+        body = replaceLabel(body, label_table, word_count);
+    }
+
+    bytes = Instruction::parseBody(body, format, op);
+    line[0] = get<0>(bytes);
+    line[1] = get<1>(bytes);
+    
+    line[0] |= opcode;
+
+    return get<2>(bytes);
+}
+
+pair<byte, byte> Line::getWord(){
+    return make_pair(line[0], line[1]);
 }
