@@ -1,6 +1,6 @@
 #include "Line.h"
 
-Line::Line(const char *line, const size_t count){
+Line::Line(const char *line, const size_t count, bool print_line){
     this->count = count;
     original = string(line);
     lower = Utils::tolower(original);
@@ -29,7 +29,9 @@ Line::Line(const char *line, const size_t count){
         valid = true;
     }
 
-    printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+    if(print_line){
+        printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+    }
 
 }
 
@@ -90,15 +92,16 @@ bool Line::isValid(){
     return valid;
 }
 
-int Line::processLine(const map<string, size_t> label_table, const size_t word_count){
+int Line::processLine(const map<string, size_t> label_table, const size_t word_count, bool print_line){
     tuple<byte, byte, int> bytes;
 
     if(Instruction::labelAble(op)){
         body = replaceLabel(body, label_table, word_count);
     }
 
-
-    printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+    if(print_line){
+        printf("Line %lu: [%s|%s|%s]\n", this->count, label.c_str(), instruction.c_str(), body.c_str());
+    }
 
     bytes = Instruction::parseBody(body, format, op);
     line[0] = get<0>(bytes);

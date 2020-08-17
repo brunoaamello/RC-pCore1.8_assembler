@@ -38,7 +38,7 @@ class Line{
         byte line[2];
 
     public:
-        Line(const char *line, const size_t count);
+        Line(const char *line, const size_t count, bool print_line = false);
         
         size_t len();
         size_t numWords();
@@ -51,7 +51,7 @@ class Line{
         bool isValid();
         vector<byte> getWords();
 
-        int processLine(const map<string, size_t> label_table, const size_t word_count);
+        int processLine(const map<string, size_t> label_table, const size_t word_count, bool print_line = false);
 };
 
 #endif

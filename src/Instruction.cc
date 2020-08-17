@@ -18,16 +18,22 @@ string Instruction::getError(const ERROR err){
     switch(err){
         case IMM3_OUT_OF_RANGE:
             err_msg = "Immediate(3-bits) out of range [0, 7]";
+            break;
         case IMM8_OUT_OF_RANGE:
             err_msg = "Immediate(8-bits) out of range [0, 255]";
+            break;
         case OFFSET_OUT_OF_RANGE:
             err_msg = "Offset(11-bits) out of range [-1024, 1023]";
+            break;
         case REGISTER_OUT_OF_RANGE:
             err_msg = "Register out of range [0, 15]";
+            break;
         case UNKNOWN_INSTRUCTION:
             err_msg = "Unknown Instruction";
+            break;
         case NO_ERROR:
             err_msg = "No Error";
+            break;
     }
     return err_msg;
 }
@@ -43,15 +49,15 @@ vector<ERROR> Instruction::unpackErrors(const int err){
         }
         local_err = err & IMM8_OUT_OF_RANGE;
         if (local_err){
-            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+            errors.insert(errors.end(), IMM8_OUT_OF_RANGE);
         }
         local_err = err & OFFSET_OUT_OF_RANGE;
         if (local_err){
-            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+            errors.insert(errors.end(), OFFSET_OUT_OF_RANGE);
         }
         local_err = err & REGISTER_OUT_OF_RANGE;
         if (local_err){
-            errors.insert(errors.end(), IMM3_OUT_OF_RANGE);
+            errors.insert(errors.end(), REGISTER_OUT_OF_RANGE);
         }
     }
     return errors;
@@ -267,6 +273,8 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
                     fprintf(stderr, "Register of value %d out of range\n", rc);
                 }
                 err |= REGISTER_OUT_OF_RANGE;
+            }
+            if(rc > 7){
                 rc %= 8;
             }
             msb |= byte(rc);
@@ -296,6 +304,8 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
                     fprintf(stderr, "Register of value %d out of range\n", ra);
                 }
                 err |= REGISTER_OUT_OF_RANGE;
+            }
+            if(ra > 7){
                 ra %= 8;
             }
             lsb |= byte(ra);

@@ -98,6 +98,7 @@ int main(int argc, char *argv[]){
     }
 
     printf("\nFinished parsing file, saved to %s\n", outfilename.c_str());
+    printf("Total of %lu words\n%.2f%% of program memory used\nUsed %lu out of %lu bytes\n", word_count, (word_count*2.0)/(64.0*1024.0), word_count*2, (size_t) 64*1024);
 
     // Cleanup
 
