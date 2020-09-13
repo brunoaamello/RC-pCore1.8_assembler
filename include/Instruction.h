@@ -78,7 +78,7 @@ public:
     static pair<string, string> separateLine(const string s);
     static tuple<OP, byte, ERROR> parseOp(const string s);
     static FORMAT getFormat(const OP op);
-    static tuple<byte, byte, int> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, const bool print_errors = false);
+    static tuple<byte, byte, int> parseBody(const string s, const FORMAT f, const OP op = UNKNOWN, const bool print_errors = true);
 
     static bool labelAble(const OP op);
 

@@ -38,7 +38,7 @@ class Line{
         byte line[2];
 
     public:
-        Line(const char *line, const size_t count, bool print_line = false);
+        Line(const char *line, const size_t count, bool print_line = true);
         
         size_t len();
         size_t numWords();

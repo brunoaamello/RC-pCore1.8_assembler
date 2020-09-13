@@ -324,7 +324,16 @@ tuple<byte, byte, int> Instruction::parseBody(const string s, const FORMAT f, co
             msb |= access;
             break;
         case R4_R4:
+            ra = -1;
+            rb = -1;
             sscanf(s.c_str(), "r%d r%d", &ra, &rb);
+            // RET empty register check
+            if(ra == -1){
+                ra = 14; // RET_ADDR_H
+            }
+            if(rb == -1){
+                rb = 13; // RET_ADDR_L
+            }
             if(rb > 15){
                 if(print_errors){
                     fprintf(stderr, "Register of value %d out of range\n", rb);
