@@ -49,10 +49,16 @@ int main(int argc, char *argv[]){
     unsigned char access;
 
     while(byte_count<numwords && !(feof(infile))){
-        fread(&access, sizeof(unsigned char), 1, infile);
-        fprintf(outfile_msb, "%.2x ", access);
-        fread(&access, sizeof(unsigned char), 1, infile);
-        fprintf(outfile_lsb, "%.2x ", access);
+        if(fread(&access, sizeof(unsigned char), 1, infile) == 1){
+            fprintf(outfile_msb, "%.2x ", access);
+        }else{
+            fprintf(outfile_msb, "00 ");
+        }
+        if(fread(&access, sizeof(unsigned char), 1, infile) == 1){
+            fprintf(outfile_lsb, "%.2x ", access);
+        }else{
+            fprintf(outfile_lsb, "00 ");
+        }
         byte_count++;
     }
 
