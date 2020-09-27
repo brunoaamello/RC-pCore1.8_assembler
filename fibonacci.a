@@ -1,0 +1,118 @@
+
+
+SMSB 1 1
+MOVi R12 0
+MOVi R15 0
+
+
+MOVi R9 18
+JAL FIB
+NOP
+
+LOOP:
+MOV R15 R10
+MOV R15 R11
+J LOOP
+NOP
+
+FIB:
+    SW R0 R12
+    ADDi R12 1
+    ADDCi R15 0
+    NOP
+
+    SW R1 R12
+    ADDi R12 1
+    ADDCi R15 0
+    NOP
+
+    SW R13 R12
+    ADDi R12 1
+    ADDCi R15 0
+    NOP
+
+    SW R14 R12
+    ADDi R12 1
+    ADDCi R15 0
+    NOP
+
+    MOV R0 R9
+    SUBi R9 1
+    JLZ IN_ZERO
+    SUBi R9 1
+    JLZ IN_ONE
+    NOP
+    JAL FIB
+    NOP
+    MOV R9 R0
+    MOV R0 R10
+    MOV R1 R11
+    SUBi R9 1
+    JAL FIB
+    NOP
+    ADD R10 R0 R10
+    ADDC R11 R1 R11
+    J FIB_END
+    NOP
+
+IN_ZERO:
+    MOVi R10 0
+    MOVi R11 0
+    J FIB_END
+    NOP
+
+IN_ONE:
+    MOVi R10 1
+    MOVi R11 0
+
+FIB_END:
+    SUBi R12 1
+    JLZ DPL_LZ_R14_FIB
+    NOP
+    J DPL_GZ_R14_FIB
+    NOP
+DPL_LZ_R14_FIB:
+    SUBi R15 1
+    NOP
+DPL_GZ_R14_FIB:
+    LW R14 R12
+    NOP
+
+    SUBi R12 1
+    JLZ DPL_LZ_R13_FIB
+    NOP
+    J DPL_GZ_R13_FIB
+    NOP
+DPL_LZ_R13_FIB:
+    SUBi R15 1
+    NOP
+DPL_GZ_R13_FIB:
+    LW R13 R12
+    NOP
+
+    SUBi R12 1
+    JLZ DPL_LZ_R1_FIB
+    NOP
+    J DPL_GZ_R1_FIB
+    NOP
+DPL_LZ_R1_FIB:
+    SUBi R15 1
+    NOP
+DPL_GZ_R1_FIB:
+    LW R1 R12
+    NOP
+    
+    SUBi R12 1
+    JLZ DPL_LZ_R0_FIB
+    NOP
+    J DPL_GZ_R0_FIB
+    NOP
+DPL_LZ_R0_FIB:
+    SUBi R15 1
+    NOP
+DPL_GZ_R0_FIB:
+    LW R0 R12
+    NOP
+
+
+    RET
